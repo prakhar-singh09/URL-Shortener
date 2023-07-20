@@ -1,39 +1,50 @@
+const dotenv = require("dotenv");
+dotenv.config();
 const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
 const { connectToMongoDB } = require("./connect");
-const urlRoute = require("./routes/url");
-const URL  = require('./models/url');
-const app = express();
-const PORT = 8001;
+const { restrictToLoggedinUserOnly, checkAuth } = require("./middlewares/auth");
+const URL = require("./models/url");
 
-connectToMongoDB("mongodb://0.0.0.0:27017/short-url")
-.then(() => console.log("Mongodb connected...")
+const urlRoute = require("./routes/url");
+const staticRoute = require("./routes/staticRouter");
+const userRoute = require("./routes/user");
+
+const app = express();
+const PORT = process.env.PORT || '8001';
+const DB_URL = process.env.DB_URL;
+
+connectToMongoDB(DB_URL).then(() =>
+  console.log("Mongodb connected")
 );
 
+app.set("view engine", "ejs");
+app.set("views", path.resolve("./views"));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
-app.use("/url",urlRoute);
+app.use("/url", restrictToLoggedinUserOnly, urlRoute);
+app.use("/user", userRoute);
+app.use("/", checkAuth, staticRoute);
 
-app.get('/:shortId', async (req,res)=> {
-      const shortId = req.params.shortId;
-      const entry = await URL.findOneAndUpdate(
-      {
-         shortId,
-      }, 
-      {
-         $push: {
-            visitHistory:  {
-            timestamp: Date.now(),
-         },
-       },
-     }
-   );
-   if (entry && entry.redirectURL) {
-      res.redirect(entry.redirectURL);
-    } else {
-      // Handle the case when 'entry' is null or 'redirectURL' is not available
-      // You can choose to redirect to a default URL or show an error message.
-      res.redirect('/default-url');
-    }    
+app.get("/url/:shortId", async (req, res) => {
+  const shortId = req.params.shortId;
+  const entry = await URL.findOneAndUpdate(
+    {
+      shortId,
+    },
+    {
+      $push: {
+        visitHistory: {
+          timestamp: Date.now(),
+        },
+      },
+    }
+  );
+  res.redirect(entry.redirectURL);
 });
 
-app.listen(8001, () => console.log('server started at PORT: 8001'));
+app.listen(PORT, () => console.log(`Server Started at PORT:${PORT}`));

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-heading {
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Custom CSS for table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+    <title>Dashboard</title>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="dashboard-heading">Dashboard</h1>
+        <% if (locals.id) { %>
+        <p class="text-center">URL Generated: http://localhost:8001/url/<%= id %></p>
+        <% } %>
+
+        <div class="mt-5 form-container">
+            <form method="POST" action="/url">
+                <div class="input-group">
+                    <span class="input-group-text">Enter Your Original URL</span>
+                    <input type="text" name="url" class="form-control" placeholder="https://example.com" />
+                </div>
+                <div class="d-grid mt-3">
+                    <button type="submit" class="btn btn-primary">Generate</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-container mt-5">
+            <% if (locals.urls) { %>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">S. No</th>
+                        <th scope="col">ShortID</th>
+                        <th scope="col">Redirect</th>
+                        <th scope="col">Clicks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% urls.forEach((url, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= url.shortId %></td>
+                        <td><%= url.redirectURL %></td>
+                        <td><%= url.visitHistory.length %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+            <% } else { %>
+            <p class="text-center">No data available</p>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
