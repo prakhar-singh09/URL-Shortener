@@ -14,7 +14,7 @@ async function handleUserSignup(req, res) {
 
 async function handleUserLogin(req, res) {
   const { email, password } = req.body;
-  const user = await User.findOne({ email, password });
+ // const user = await User.findOne({ email, password });
 
   if (!user)
     return res.render("login", {
